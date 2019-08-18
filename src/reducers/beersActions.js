@@ -2,6 +2,7 @@ export const FETCH_FULLFILLED = "FETCH_FULLFILLED";
 export const SET_STATUS = "SET_STATUS";
 export const FETCH_DATA = "FETCH_DATA";
 export const SEARCH = "SEARCH";
+export const RANDOM = "RANDOM";
 export const FETCH_FAILED = "FETCH_FAILED";
 export const CANCEL = "CANCEL";
 export const RESET = "RESET";
@@ -49,5 +50,11 @@ export function cancel() {
 export function reset() {
   return {
     type: RESET
+  };
+}
+
+export function random() {
+  return {
+    type: RANDOM
   };
 }

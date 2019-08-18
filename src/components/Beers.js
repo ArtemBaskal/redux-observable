@@ -3,9 +3,10 @@ import { connect } from "react-redux";
 import { BeersList } from "./BeersList";
 import { search, cancel } from "../reducers/beersActions";
 import { setConfig } from "../reducers/configActions";
+import { random } from "../reducers/beersActions";
 
 export function Beers(props) {
-  const { status, data, messages, search, cancel, setConfig, config } = props;
+  const { status, data, messages, random, cancel, setConfig, config } = props;
   return (
     <div>
       <select
@@ -20,11 +21,14 @@ export function Beers(props) {
         ))}
       </select>
       <div>
-        <input
+        {/* <input
           type="text"
           placeholder="Search beers"
           onChange={evt => search(evt.target.value)}
-        />
+        /> */}
+        <button type="button" onClick={random}>
+          Random
+        </button>
         {status === "pending" && (
           <div>
             <button type="button" onClick={cancel}>
@@ -57,5 +61,5 @@ function mapStateToProps(state) {
 
 export default connect(
   mapStateToProps,
-  { search, cancel, setConfig }
+  { search, cancel, setConfig, random }
 )(Beers);

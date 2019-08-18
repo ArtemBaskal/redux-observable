@@ -1,5 +1,4 @@
-import { ajax } from "rxjs/ajax";
-import { concat, of, race, fromEvent, merge } from "rxjs";
+import { concat, of, race, fromEvent, merge, forkJoin } from "rxjs";
 import {
   map,
   switchMap,
@@ -18,28 +17,31 @@ import {
   setStatus,
   fetchFailed,
   CANCEL,
-  reset
+  reset,
+  RANDOM
 } from "../reducers/beersActions";
 
 const search = (apiBase, perPage, term) =>
   `${apiBase}?beer_name=${encodeURIComponent(term)}&per_page=${perPage}`;
 
-export function fetchBeersEpic(action$, state$) {
+const random = apiBase => `${apiBase}/random`;
+
+export function fetchBeersEpic(action$, state$, { getJSON, document }) {
   return action$.pipe(
-    ofType(SEARCH),
+    ofType(RANDOM),
     debounceTime(500),
-    filter(({ payload }) => payload.trim() !== ""),
     withLatestFrom(state$.pipe(pluck("config"))),
     switchMap(([{ payload }, config]) => {
-      const ajax$ = ajax
-        .getJSON(search(config.apiBase, config.perPage, payload))
-        .pipe(
-          // delay(5000),
-          map(resp => fetchFullfilled(resp)),
-          catchError(err => {
-            return of(fetchFailed(err.response.message));
-          })
-        );
+      const reqs = [...Array(config.perPage)].map(() => {
+        return getJSON(random(config.apiBase)).pipe(pluck(0));
+      });
+      const ajax$ = forkJoin(reqs).pipe(
+        // delay(5000),
+        map(resp => fetchFullfilled(resp)),
+        catchError(err => {
+          return of(fetchFailed(err.response.message));
+        })
+      );
 
       const blocker$ = merge(
         action$.pipe(ofType(CANCEL)),
